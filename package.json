@@ -1,0 +1,26 @@
+{
+  "name": "Server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.175.0",
+    "body-parser": "^1.18.2",
+    "chai": "^4.1.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "method-override": "^2.3.10",
+    "mocha": "^4.0.1",
+    "morgan": "^1.9.0",
+    "nodemon": "^1.14.1",
+    "pug": "^2.0.0-rc.4",
+    "supertest": "^3.0.0"
+  },
+  "devDependencies": {}
+}
