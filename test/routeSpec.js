@@ -4,6 +4,7 @@ var expect = require('chai').expect; // use chai!
 
 const dbTest = require('./dbTest');
 
+
 // test for redirect from root
 describe('GET /', function() {
   it('responds with redirect', function(done) {
@@ -14,9 +15,9 @@ describe('GET /', function() {
 });
 
 // test for 'users' route
-describe('/users Route', function() {
-  before('before: /users', function(done) {
-    dbTest.createTable("Users", tableUsers, done);
+describe('/users Route', function(done) {
+  before('before: /users', async function() {
+    await dbTest.createTable("Users", tableUsers);
   });
 
   after('after: /users',function(done) {
@@ -49,6 +50,11 @@ describe('/users Route', function() {
       request(app)
         .delete('/users/test')
         .expect(302, done);
+    });
+  });
+  describe("TRY AN OP", function(done) {
+    it("try to add an item", function(done) {
+      dbTest.addToTable("Users", { username: "Brian" }, done)
     });
   });
 });
