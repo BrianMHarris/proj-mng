@@ -2,8 +2,17 @@ const request = require('supertest'); // test http requests/responses
 const app = require('../app'); // get the app
 var expect = require('chai').expect; // use chai!
 
-const dbTest = require('./dbTest');
+const dbTest = require('../static/js/dbTest');
 
+const user1 = {
+  firstName: "Brian",
+  lastName: "Harris"
+}
+
+const user2 = {
+  firstName: "Jenny",
+  lastName: "Harris"
+}
 
 // test for redirect from root
 describe('GET /', function() {
@@ -16,13 +25,31 @@ describe('GET /', function() {
 
 // test for 'users' route
 describe('/users Route', function(done) {
-  before('before: /users', async function() {
-    await dbTest.createTable("Users", tableUsers);
+  before('before: /users', function(done) {
+    // setup
+    dbTest.initialize();
+    done();
   });
 
   after('after: /users',function(done) {
-    dbTest.deleteTable("Users", done);
+    dbTest.deleteModel("User", {});
+    done();
   });
+
+  describe('POST /users', function() {
+    it('inserts a new user object', function() {
+      return new Promise((resolve, reject) => {
+        request(app)
+          .post('/users')
+          .send(user1)
+          .expect(200)
+          .then(() => (resolve()))
+          .catch((err => (reject(err))))
+      });
+    });
+  });
+// Needs a signup & login type of test
+// authentication necessary
 
   describe('GET /users', function(done) {
     it('responds with JSON', function(done) {
@@ -31,30 +58,11 @@ describe('/users Route', function(done) {
         .expect(200, done);
     });
   });
-  describe('POST /users', function(done) {
-    it('responds with JSON', function(done) {
-      request(app)
-        .post('/users')
-        .expect(302, done);
-    });
-  });
   describe('PATCH /users', function(done) {
     it('responds with JSON', function(done) {
       request(app)
         .patch('/users/test')
         .expect(200, done);
-    });
-  });
-  describe('DELETE /users', function(done) {
-    it('responds with JSON', function(done) {
-      request(app)
-        .delete('/users/test')
-        .expect(302, done);
-    });
-  });
-  describe("TRY AN OP", function(done) {
-    it("try to add an item", function(done) {
-      dbTest.addToTable("Users", { username: "Brian" }, done)
     });
   });
 });

@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
+require('locus');
 
-const db = require("../static/js/db.js")
+const db = require("../static/js/db.js");
+const modelName = "User";
 
 /*
   '/users'
@@ -12,7 +14,15 @@ router
     return res.sendStatus(200);
   })
   .post((req, res, next) => {
-    return res.redirect("/users");
+    // res.sendStatus(200)
+    // console.log("POST: " + db)
+    db.insertModel(modelName, req.body)
+      .then(data => (
+        res.sendStatus(200)
+      ))
+      .catch(err => (
+        res.sendStatus(err)
+      ));
   });
 
 
