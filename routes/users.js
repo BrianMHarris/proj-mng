@@ -11,7 +11,8 @@ const modelName = "User";
 router
   .route("")
   .get((req, res, next) => {
-    return res.sendStatus(200);
+    // this route currently doesn't do anything
+    return res.sendStatus(400);
   })
   .post((req, res, next) => {
     // res.sendStatus(200)
@@ -20,9 +21,14 @@ router
       .then(data => (
         res.sendStatus(200)
       ))
-      .catch(err => (
-        res.sendStatus(err)
-      ));
+      .catch(err => {
+        // if the error is a normal code, send it
+        if (typeof err === 'number')
+          res.sendStatus(err)
+        // otherwise it's likely a server error
+        res.sendStatus(500);
+        console.log(err)
+      });
   });
 
 
@@ -31,6 +37,19 @@ router
 */
 router
   .route("/:name")
+  .get((req, res, next) => {
+    db.findModel(modelName, {username: req.params.name})
+      .then(data => {
+        let user = data;
+        res.status(200).send(JSON.stringify(user));
+      })
+      .catch(err => {
+        if (typeof err === 'number')
+          res.sendStatus(err);
+        // otherwise it's likely a server error
+        res.sendStatus(500);
+      });
+  })
   .patch((req, res, next) => {
     return res.sendStatus(200);
   })

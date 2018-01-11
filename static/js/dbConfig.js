@@ -12,7 +12,7 @@ module.exports = {
   },
   test: {
     client: 'mongodb',
-    connection: 'mongodb://localhost/proj-man-test',
+    connection: 'mongodb://localhost/proj-man-stuff',
     debug: true,
     // migrations: {
     //   directory: __dirname + '/src/server/db/migrations'

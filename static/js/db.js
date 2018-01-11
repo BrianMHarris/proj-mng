@@ -1,6 +1,6 @@
 const environment = process.env.NODE_ENV;
 const config = require('./dbConfig.js')[environment];
-const blueprints = require('../../models/index');
+const modelsImport = require('../../models/index');
 
 const settings = {
   connectedMsg: "Connected to MongoDB",
@@ -26,23 +26,13 @@ class Database {
       ));
   }
 
-  buildModels(blueprints) {
-    if (!blueprints || blueprints.length === 0) {
+  attachModels(models) {
+    if (!models || models.length === 0) {
       if (config.debug)
-        console.log("Database::buildModels ERROR - argument not valid")
-      return undefined;
+        console.log("Database::attachModels ERROR - no models found")
+      return;
     };
-
-    // for every blueprint we import, build a schema and model
-    //  (fake schema!)
-    for (var key in blueprints) {
-      let schema = new this.db.Schema(
-        blueprints[key],
-        {timestamps: true}
-      );
-      this.models[key] = this.db.model(key, schema);
-    }
-
+    this.models = models;
     return this.models;
   }
 
@@ -50,10 +40,12 @@ class Database {
     // NOTE: handle errors from function below here as well, don't move on?
     this.connect(); // this is async, await / errors handled inside
 
-    // currently using the const blueprints from above
-    if (this.buildModels(blueprints)) {
+    // attach the imported models
+    if (this.attachModels(modelsImport)) {
+      return true;
     } else {
-      console.log("Database::initialize ERROR - build models failed");
+      console.log("Database::initialize ERROR - attach models failed");
+      return false;
     }
   }
 
@@ -62,21 +54,20 @@ class Database {
   insertModel(modelName, params) {
     let model = this.models[modelName];
 
+    if (!model) {
+      return Promise.reject("Error - Database::insertModel - '" + modelName + "' does not exist");
+    }
+
     return new Promise(function(resolve, reject) {
-      if (!model) {
-        reject("'" + modelName + "' does not exist");
-      }
       model.create(params)
         .then(data => (
           resolve(data)
         ))
-        .catch(err => (
-          reject(err)
-        ));
+        .catch(err => {
+          console.log("Error - Database::insertModel - " + err);
+          reject(err);
+        })
     })
-    .catch(err => {
-      console.log("Error - Database::insertModel ERROR - " + err);
-    });
   }
 
   // modeName:  name of the model key found in this.models
@@ -90,7 +81,7 @@ class Database {
     removeFN
       .then()
       .catch(err => {
-        console.log("Database::deleteModel ERROR - ", err);
+        console.log("Error - Database::deleteModel - ", err);
       });
   }
 
@@ -99,14 +90,18 @@ class Database {
   // many:      find and return all entries with these parameters? false = first found
   // NOTE:      find all records by passing params={} and multiple=true
   findModel(modelName, params, multiple=false) {
+    console.log(params)
     let findFN = (multiple === true) ? this.models[modelName].find(params) :
       this.models[modelName].findOne(params);
 
-    findFN
-      .then()
-      .catch(err => {
-        console.log("Database::findModel ERROR - ", err);
-      });
+    return new Promise(function(resolve, reject) {
+      findFN
+        .then(data => resolve(data))
+        .catch(err => {
+          console.log("Database::findModel ERROR - ", err);
+          reject(err);
+        });
+    });
   }
 }
 
