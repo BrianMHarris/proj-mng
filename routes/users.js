@@ -15,11 +15,9 @@ router
     return res.sendStatus(400);
   })
   .post((req, res, next) => {
-    // res.sendStatus(200)
-    // console.log("POST: " + db)
     db.insertModel(modelName, req.body)
       .then(data => (
-        res.sendStatus(200)
+        res.status(201).send(data)
       ))
       .catch(err => {
         // if the error is a normal code, send it
@@ -27,10 +25,8 @@ router
           res.sendStatus(err)
         // otherwise it's likely a server error
         res.sendStatus(500);
-        console.log(err)
       });
   });
-
 
 /*
   '/users/:name'
@@ -40,14 +36,23 @@ router
   .get((req, res, next) => {
     db.findModel(modelName, {username: req.params.name})
       .then(data => {
-        let user = data;
-        res.status(200).send(JSON.stringify(user));
+        if (data) {
+          // prepare the user data w/ password
+          var user = Object.assign({}, data._doc);
+          delete user.password;
+
+          res.status(200).send(user);
+        } else {
+          res.sendStatus(404);
+        }
       })
       .catch(err => {
-        if (typeof err === 'number')
+        if (typeof err === 'number') {
           res.sendStatus(err);
-        // otherwise it's likely a server error
-        res.sendStatus(500);
+        } else {
+          // otherwise it's likely a server error
+          res.sendStatus(500);
+        }
       });
   })
   .patch((req, res, next) => {
