@@ -24,7 +24,7 @@ class Database {
         console.log(settings.connectedMsg)
       })
       .catch((err) => (
-        this.logDBError(this.name, err);
+        this.logDBError(this.name, err)
       ));
   }
 

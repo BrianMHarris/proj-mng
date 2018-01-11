@@ -35,14 +35,16 @@ router
   .route("/:name")
   .get((req, res, next) => {
     db.findModel(modelName, {username: req.params.name})
-      .then(data => {
-        if (data) {
-          // prepare the user data w/ password
-          var user = Object.assign({}, data._doc);
-          delete user.password;
+      .then(data => { // the search succeeded...
+        if (data) { // ...and found the document
+          // prepare the user data to send back
+          var user = {
+            username: data.username,
+            email: data.email
+          }
 
           res.status(200).send(user);
-        } else {
+        } else { // ...but didn't find the document
           res.sendStatus(404);
         }
       })
@@ -55,7 +57,7 @@ router
         }
       });
   })
-  .patch((req, res, next) => {
+  .patch((req, res, next) => { // UPDATE
     return res.sendStatus(200);
   })
   .delete((req, res, next) => {
